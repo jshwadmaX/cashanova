@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Profile</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #5341e9;
+            --secondary-color:rgb(85, 11, 138);
+            --background-color: #f5f7fa;
+            --card-bg: #ffffff;
+            --text-color: #333;
+            --border-radius: 12px;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+
+        .navbar {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color)) !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .card {
+            border-radius: var(--border-radius);
+            border: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background-color: var(--card-bg);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            padding: 1rem;
+        }
+
+        .card-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .profile-img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5rem;
+            margin: 0 auto 1.5rem auto;
+        }
+
+        .profile-info {
+            padding: 1rem;
+            background-color: #f8f9fa;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .profile-info:hover {
+            background-color: #f0f2f5;
+            transform: translateY(-2px);
+        }
+
+        .profile-info-label {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            border-radius: 50px;
+            padding: 0.5rem 1.5rem;
+            box-shadow: 0 2px 8px rgba(83, 65, 233, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(83, 65, 233, 0.4);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('home') }}">
+                <i class="fas fa-compass me-2"></i>My App
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('home') }}">
+                            <i class="fas fa-home me-1"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('profile') }}">
+                            <i class="fas fa-user me-1"></i>Profile
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">
+                            <i class="fas fa-sign-out-alt me-1"></i>Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2><i class="fas fa-user-circle me-2"></i>User Profile</h2>
+                <a href="{{ url_for('edit_profile') }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-edit me-1"></i>Edit Profile
+                </a>
+            </div>
+            <div class="card-body text-center">
+                <div class="profile-img">
+                    <i class="fas fa-user"></i>
+                </div>
+                
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <div class="profile-info">
+                            <div class="row">
+                                <div class="col-md-4 profile-info-label text-md-end">Username:</div>
+                                <div class="col-md-8 text-md-start">{{ account['username'] }}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-info">
+                            <div class="row">
+                                <div class="col-md-4 profile-info-label text-md-end">Email:</div>
+                                <div class="col-md-8 text-md-start">{{ account['email'] }}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-info">
+                            <div class="row">
+                                <div class="col-md-4 profile-info-label text-md-end">User ID:</div>
+                                <div class="col-md-8 text-md-start">{{ account['id'] }}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-info">
+                            <div class="row">
+                                <div class="col-md-4 profile-info-label text-md-end">Member Since:</div>
+                                <div class="col-md-8 text-md-start">April 01, 2025</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

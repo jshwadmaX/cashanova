@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Currency Converter</title>
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet"/>
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+
+  <style>
+    body {
+      background: linear-gradient(135deg, #f8f9fa, #ffffff);
+      color: #212529;
+      font-family: 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+    .navbar {
+      background-color: rgb(18, 15, 206) !important;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+    .navbar-brand, .nav-link {
+      color: #ffffff !important;
+    }
+    .navbar-brand i, .nav-link i {
+      margin-right: 5px;
+    }
+    .card {
+      background-color: #ffffff;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      box-shadow: 0 8px 28px rgba(18, 15, 206, 0.08);
+    }
+    .card-header {
+      background: linear-gradient(to right, rgb(18, 15, 206), rgb(92, 71, 228));
+      border-top-left-radius: 12px;
+      border-top-right-radius: 12px;
+      color: white;
+    }
+    .form-label, .form-select, .form-control {
+      background-color: #ffffff;
+      border: 1px solid #ced4da;
+      color: #212529;
+    }
+    .form-select:focus, .form-control:focus {
+      border-color: rgb(18, 15, 206);
+      box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+    }
+    .btn-primary {
+      background-color: rgb(18, 15, 206);
+      border: none;
+      box-shadow: 0 4px 12px rgba(0, 123, 255, 0.2);
+    }
+    .btn-info {
+      background-color: rgb(23, 23, 184);
+      border: none;
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+    }
+    .result-display {
+      background-color: #e9f7fe;
+      color: rgb(18, 15, 207);
+      border: 2px dashed #66b2ff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 123, 255, 0.1);
+    }
+    .result-display h2 {
+      color: #28a745;
+      font-weight: bold;
+    }
+    .converter-wrap {
+      max-width: 920px;
+    }
+    .converter-card .card-header {
+      padding: 1.5rem;
+    }
+    .converter-card .card-body {
+      padding: clamp(1.25rem, 4vw, 2.5rem);
+    }
+    .form-label {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .form-control, .form-select {
+      min-height: 48px;
+      border-radius: 6px;
+    }
+    .result-display {
+      border-style: solid;
+      border-width: 0 0 0 4px;
+      border-color: rgb(18, 15, 206);
+      background: #f3f4ff;
+      text-align: left;
+    }
+    #result-value {
+      color: rgb(18, 15, 206);
+      font-size: 1.25rem;
+    }
+    #result-message:empty {
+      display: none;
+    }
+    footer {
+      background-color: #f8f9fa;
+      color: #6c757d;
+      padding: 20px 0;
+      text-align: center;
+      box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.05);
+      margin-top: 50px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{{ url_for('dashboard') }}"><i class="fas fa-exchange-alt"></i> Cashanova</a>
+      <div class="navbar-nav ms-auto flex-row gap-3">
+        <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
+        <a class="nav-link" href="{{ url_for('exchange_rates') }}">Exchange rates</a>
+      </div>
+    </div>
+  </nav>
+
+  
+
+  <!-- Main Content -->
+  <div class="container converter-wrap mt-4 mt-md-5">
+    <div class="mb-3">
+      <h1 class="h3 mb-1">Currency converter</h1>
+      <p class="text-muted mb-0">Calculate using the latest rates saved by the app.</p>
+    </div>
+    <div class="card converter-card">
+      <div class="card-header">
+        <h2 class="h5 mb-1">Convert an amount</h2>
+        <small>Rates updated daily by the provider</small>
+      </div>
+      <div class="card-body">
+        <form id="converter-form">
+          <div class="row g-3 align-items-end">
+            <div class="col-md-4">
+              <label for="amount" class="form-label">Amount</label>
+              <input type="number" class="form-control" id="amount" min="0.01" step="any" inputmode="decimal" placeholder="1.00" required>
+            </div>
+            <div class="col-md-3">
+              <label for="from_currency" class="form-label">From</label>
+              <select class="form-select" id="from_currency" required>
+                {% for currency in currencies %}<option value="{{ currency }}" {% if currency == 'USD' %}selected{% endif %}>{{ currency }}</option>{% endfor %}
+              </select>
+            </div>
+            <div class="col-md-1 text-center">
+              <button type="button" class="btn btn-outline-primary w-100" id="swap-button" aria-label="Swap currencies" title="Swap currencies"><i class="fas fa-right-left"></i></button>
+            </div>
+            <div class="col-md-3">
+              <label for="to_currency" class="form-label">To</label>
+              <select class="form-select" id="to_currency" required>
+                {% for currency in currencies %}<option value="{{ currency }}" {% if currency == 'EUR' %}selected{% endif %}>{{ currency }}</option>{% endfor %}
+              </select>
+            </div>
+            <div class="col-md-1">
+              <button type="submit" class="btn btn-primary w-100" aria-label="Convert"><i class="fas fa-equals"></i></button>
+            </div>
+          </div>
+        </form>
+        <div id="result-message" class="alert alert-danger mt-3" role="alert" aria-live="polite"></div>
+        <div id="result-container" class="mt-4 result-display" style="display: none;">
+          <h3 class="h6 text-muted">Converted amount</h3>
+          <p class="mb-1"><span id="result-amount"></span> <span id="result-from"></span> =
+          <strong id="result-value"></strong> <span id="result-to"></span></p>
+          <p id="rate-info" class="small text-muted mb-0"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      <p>&copy; 2025 Currency Exchange Application. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Custom JS -->
+ <!-- Replace the existing script section with this updated version -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // Swap currencies
+    document.getElementById('swap-button').addEventListener('click', function () {
+        const fromSelect = document.getElementById('from_currency');
+        const toSelect = document.getElementById('to_currency');
+        const temp = fromSelect.value;
+        fromSelect.value = toSelect.value;
+        toSelect.value = temp;
+    });
+
+    // Handle form submission
+    document.getElementById('converter-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const amount = document.getElementById('amount').value;
+        const fromCurrency = document.getElementById('from_currency').value;
+        const toCurrency = document.getElementById('to_currency').value;
+
+        // Validate input
+        if (!amount || isNaN(amount) || parseFloat(amount) <= 0) {
+            alert('Please enter a valid positive number for the amount');
+            return;
+        }
+
+        if (!fromCurrency || !toCurrency) {
+            alert('Please select both currencies');
+            return;
+        }
+
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalBtnText = submitBtn.innerHTML;
+        const message = document.getElementById('result-message');
+        message.textContent = '';
+        message.classList.add('d-none');
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Converting...';
+        submitBtn.disabled = true;
+
+        const resultContainer = document.getElementById('result-container');
+
+        fetch('/convert', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+                amount: amount,
+                from_currency: fromCurrency,
+                to_currency: toCurrency,
+            }),
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            submitBtn.innerHTML = originalBtnText;
+            submitBtn.disabled = false;
+
+            if (data.success) {
+                document.getElementById('result-amount').textContent = Number(amount).toLocaleString(undefined, { maximumFractionDigits: 2 });
+                document.getElementById('result-from').textContent = fromCurrency;
+                document.getElementById('result-to').textContent = toCurrency;
+                document.getElementById('result-value').textContent = Number(data.converted_amount).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                document.getElementById('rate-info').textContent = `Rate: 1 ${fromCurrency} = ${Number(data.rate_used).toPrecision(8)} ${toCurrency}`;
+                resultContainer.style.display = 'block';
+            } else {
+                message.textContent = data.message || 'Conversion failed. Please try again.';
+                message.classList.remove('d-none');
+                resultContainer.style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            submitBtn.innerHTML = originalBtnText;
+            submitBtn.disabled = false;
+            message.textContent = 'Could not reach the server. Please try again.';
+            message.classList.remove('d-none');
+            resultContainer.style.display = 'none';
+        });
+    });
+});
+</script>
+
+</body>
+</html>

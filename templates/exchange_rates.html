@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exchange Rates</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-violet:rgb(38, 2, 218);
+            --secondary-violet:rgb(57, 5, 198);
+            --light-violet:rgb(34, 6, 173);
+            --darker-violet:rgb(25, 4, 114);
+            --darkest-violet:rgb(19, 0, 77);
+            --light-gray: #f3f3f3;
+        }
+
+        body {
+            background-color: #f8f9fa;
+            color: #202039;
+        }
+        .navbar-custom {
+            background-color: var(--primary-violet) !important;
+        }
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .card {
+            box-shadow: 0 4px 16px rgba(23, 19, 112, 0.08);
+            margin-bottom: 20px;
+            border-color: var(--primary-violet);
+            border-radius: 8px;
+        }
+        .card-header {
+            background-color: var(--primary-violet) !important;
+        }
+        .btn-primary {
+            background-color: var(--primary-violet);
+            border-color: var(--primary-violet);
+        }
+        .btn-primary:hover {
+            background-color: var(--darker-violet);
+            border-color: var(--darker-violet);
+        }
+        .btn-secondary {
+            background-color: var(--secondary-violet);
+            border-color: var(--secondary-violet);
+        }
+        .btn-secondary:hover {
+            background-color: var(--light-violet);
+            border-color: var(--light-violet);
+        }
+        .table th {
+            background-color: var(--primary-violet);
+            color: white;
+        }
+        .alert-info {
+            background-color:rgb(175, 169, 228);
+            border-color: #CE93D8;
+            color: var(--darker-violet);
+        }
+        footer {
+            margin-top: 50px;
+            padding: 20px 0;
+            background-color: var(--primary-violet);
+            color: white;
+        }
+        .nav-link:hover {
+            background-color: var(--secondary-violet);
+            border-radius: 4px;
+        }
+        .navbar {
+            background-color: var(--primary-violet) !important;
+        }
+        .rate-search {
+            max-width: 360px;
+        }
+        .table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="{{ url_for('dashboard') }}">
+                <i class="fas fa-money-bill-wave"></i> Currency Exchange
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('dashboard') }}">
+                            <i class="fas fa-tachometer-alt"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{{ url_for('exchange_rates') }}">
+                            <i class="fas fa-chart-line"></i> Exchange Rates
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('currency_converter') }}">
+                            <i class="fas fa-exchange-alt"></i> Currency Converter
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('profile') }}">
+                            <i class="fas fa-user"></i> {{ session.username }}
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">
+                        <h2><i class="fas fa-chart-line"></i> Current Exchange Rates</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info d-flex flex-wrap justify-content-between gap-2">
+                            <span><i class="fas fa-info-circle"></i> {{ refresh_message }} Rates use USD as the base currency.</span>
+                            <span>
+                                {% if latest_update %}
+                                    Provider data timestamp: {{ latest_update.strftime('%Y-%m-%d %H:%M') }} UTC
+                                {% else %}
+                                    No provider data is saved yet.
+                                {% endif %}
+                            </span>
+                        </div>
+                        <div class="mb-3">
+                            <label for="rate-search" class="form-label">Find a currency</label>
+                            <input id="rate-search" class="form-control rate-search" type="search" placeholder="Search code or rate">
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-striped table-hover" id="rates-table">
+                                <thead>
+                                    <tr>
+                                        <th>Base Currency</th>
+                                        <th>Target Currency</th>
+                                        <th>Exchange Rate</th>
+                                        <th>Last Updated</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for rate in rates %}
+                                    <tr>
+                                        <td>{{ rate.base_currency }}</td>
+                                        <td>{{ rate.target_currency }}</td>
+                                        <td>{{ '%.6f'|format(rate.exchange_rate) }}</td>
+                                        <td>{{ rate.timestamp.strftime('%Y-%m-%d %H:%M') }} UTC</td>
+                                    </tr>
+                                    {% else %}
+                                    <tr><td colspan="4" class="text-center text-muted">No exchange rates are available. Configure EXCHANGE_RATE_API_KEY and reload.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <a href="{{ url_for('currency_converter') }}" class="btn btn-primary">
+                            <i class="fas fa-exchange-alt"></i> Go to Currency Converter
+                        </a>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+                            <i class="fas fa-tachometer-alt"></i> Back to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="text-center">
+        <div class="container">
+            <p>&copy; 2025 Currency Exchange Application. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('rate-search').addEventListener('input', function () {
+            const query = this.value.trim().toLowerCase();
+            document.querySelectorAll('#rates-table tbody tr').forEach(function (row) {
+                row.hidden = !row.textContent.toLowerCase().includes(query);
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Calendar Integration</title>
+
+    <!-- Required CSS -->
+    <link href='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/main.min.css' rel='stylesheet' />
+    <link href='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.10/main.min.css' rel='stylesheet' />
+    <link href='https://cdn.jsdelivr.net/npm/@fullcalendar/timegrid@6.1.10/main.min.css' rel='stylesheet' />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --fc-border-color: #e2e8f0;
+            --fc-button-bg-color: #6366f1;
+            --fc-button-border-color: #6366f1;
+            --fc-button-hover-bg-color: #4f46e5;
+            --fc-button-hover-border-color: #4f46e5;
+            --fc-today-bg-color: rgba(99, 102, 241, 0.1);
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .calendar-container {
+            background-color: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .calendar-controls select {
+            padding: 0.5rem;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            margin-left: 10px;
+        }
+
+        .fc {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .fc .fc-toolbar.fc-header-toolbar {
+            margin-bottom: 1.5em;
+            background-color: #fff;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .fc .fc-button {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .fc .fc-daygrid-day.fc-day-today {
+            background-color: rgba(99, 102, 241, 0.1);
+        }
+
+        .fc .fc-daygrid-day-number {
+            padding: 8px;
+            color: #1e293b;
+        }
+
+        .fc .fc-col-header-cell {
+            padding: 10px 0;
+            background-color: #f8fafc;
+        }
+
+        .fc .fc-event {
+            border-radius: 4px;
+            padding: 2px 4px;
+            font-size: 0.875rem;
+            border: none;
+        }
+
+        .modal-content {
+            border-radius: 16px;
+        }
+
+        .modal-header {
+            background-color: #f8fafc;
+            border-radius: 16px 16px 0 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="calendar-container">
+        <div class="calendar-header">
+            <h2>Calendar</h2>
+            <div class="calendar-controls">
+                <select id="monthSelect" class="form-select d-inline-block w-auto">
+                    <option value="0">January</option>
+                    <option value="1">February</option>
+                    <option value="2">March</option>
+                    <option value="3">April</option>
+                    <option value="4">May</option>
+                    <option value="5">June</option>
+                    <option value="6">July</option>
+                    <option value="7">August</option>
+                    <option value="8">September</option>
+                    <option value="9">October</option>
+                    <option value="10">November</option>
+                    <option value="11">December</option>
+                </select>
+                <select id="yearSelect" class="form-select d-inline-block w-auto">
+                    <option>2024</option>
+                    <option>2025</option>
+                    <option>2026</option>
+                </select>
+            </div>
+        </div>
+        <div id="calendar"></div>
+    </div>
+
+    <!-- Event Modal -->
+    <div class="modal fade" id="eventModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Event</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="eventForm">
+                        <div class="mb-3">
+                            <label class="form-label">Event Title</label>
+                            <input type="text" class="form-control" id="eventTitle" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Start Date</label>
+                            <input type="datetime-local" class="form-control" id="eventStart" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">End Date</label>
+                            <input type="datetime-local" class="form-control" id="eventEnd">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="saveEvent">Save Event</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Required JavaScript -->
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.10/main.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.10/main.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/timegrid@6.1.10/main.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/@fullcalendar/interaction@6.1.10/main.min.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const calendarEl = document.getElementById('calendar');
+            const eventModal = new bootstrap.Modal(document.getElementById('eventModal'));
+            let selectedDate = null;
+
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                editable: true,
+                selectable: true,
+                selectMirror: true,
+                dayMaxEvents: true,
+                events: [
+                    {
+                        title: 'Sample Event',
+                        start: '2025-04-10',
+                        color: '#6366f1'
+                    }
+                ],
+                select: function(info) {
+                    selectedDate = info;
+                    document.getElementById('eventStart').value = info.startStr;
+                    document.getElementById('eventEnd').value = info.endStr;
+                    eventModal.show();
+                },
+                eventClick: function(info) {
+                    if (confirm('Delete this event?')) {
+                        info.event.remove();
+                    }
+                }
+            });
+
+            calendar.render();
+
+            // Handle month/year selection
+            document.getElementById('monthSelect').addEventListener('change', function(e) {
+                const date = calendar.getDate();
+                calendar.gotoDate(new Date(date.getFullYear(), e.target.value, 1));
+            });
+
+            document.getElementById('yearSelect').addEventListener('change', function(e) {
+                const date = calendar.getDate();
+                calendar.gotoDate(new Date(e.target.value, date.getMonth(), 1));
+            });
+
+            // Handle event saving
+            document.getElementById('saveEvent').addEventListener('click', function() {
+                const title = document.getElementById('eventTitle').value;
+                const start = document.getElementById('eventStart').value;
+                const end = document.getElementById('eventEnd').value;
+
+                if (title) {
+                    calendar.addEvent({
+                        title: title,
+                        start: start,
+                        end: end,
+                        allDay: !start.includes('T'),
+                        color: '#6366f1'
+                    });
+                }
+
+                document.getElementById('eventForm').reset();
+                eventModal.hide();
+            });
+
+            // Set initial month/year in selects
+            const currentDate = calendar.getDate();
+            document.getElementById('monthSelect').value = currentDate.getMonth();
+            document.getElementById('yearSelect').value = currentDate.getFullYear();
+        });
+    </script>
+</body>
+</html>

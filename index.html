@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Edit Profile</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>Edit Profile</h2>
+        <form id="edit-profile-form">
+            <div class="mb-3">
+                <label class="form-label">Username</label>
+                <input type="text" id="username" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Email</label>
+                <input type="email" id="email" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-success">Update</button>
+            <button type="button" id="cancel-btn" class="btn btn-secondary">Cancel</button>
+        </form>
+    </div>
+
+    <script>
+        // Demo account info
+        const account = {
+            username: "JohnDoe",
+            email: "john@example.com"
+        };
+
+        // Pre-fill form
+        document.getElementById('username').value = account.username;
+        document.getElementById('email').value = account.email;
+
+        // Handle form submission
+        document.getElementById('edit-profile-form').addEventListener('submit', function(e){
+            e.preventDefault();
+            account.username = document.getElementById('username').value;
+            account.email = document.getElementById('email').value;
+            alert('Profile updated!\nUsername: ' + account.username + '\nEmail: ' + account.email);
+        });
+
+        // Cancel button
+        document.getElementById('cancel-btn').addEventListener('click', function(){
+            alert('Cancelled. Returning to dashboard.');
+            // Replace with actual navigation if needed, e.g., window.location.href = "dashboard.html";
+        });
+    </script>
+</body>
+</html>
