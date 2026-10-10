@@ -32,6 +32,9 @@ Add screenshots in the spaces below. Suggested location: `docs/images/`.
 - Conversion history associated with the signed-in user.
 - Daily rate retrieval with a provider timestamp and a 20-hour cache window.
 
+<img width="1376" height="768" alt="Gemini_Generated_Image_9c3yoy9c3yoy9c3y" src="https://github.com/user-attachments/assets/a8788b85-aaaa-4358-a348-d9e99d8ca07e" />
+
+
 ## Technology
 
 - Python and Flask
@@ -114,6 +117,10 @@ CREATE TABLE IF NOT EXISTS exchange_rates (
 ```
 
 The included [`currencies.sql`](currencies.sql) file can seed currency names after the `currencies` table exists. Alternatively, `fetch_currencies.py` retrieves supported codes from the API.
+
+<img width="1376" height="768" alt="Gemini_Generated_Image_t9pjtqt9pjtqt9pj" src="https://github.com/user-attachments/assets/737f41f3-a2ec-4a7c-917c-8fb295cc02da" />
+
+
 
 ### 3. Set the API key
 
