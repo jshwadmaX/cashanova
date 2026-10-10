@@ -10,15 +10,18 @@ Add screenshots in the spaces below. Suggested location: `docs/images/`.
 
 ### Dashboard
 
-<!-- Add dashboard screenshot here -->
+<img width="1920" height="912" alt="Screenshot (1503)" src="https://github.com/user-attachments/assets/a4397597-8511-4bb6-a72c-ba7764539359" />
+
 
 ### Exchange rates
 
-<!-- Add exchange rates screenshot here -->
+<img width="1920" height="910" alt="Screenshot (1504)" src="https://github.com/user-attachments/assets/31808877-6999-431b-8213-1b36328dad63" />
+
 
 ### Currency converter
 
-<!-- Add currency converter screenshot here -->
+<img width="1920" height="907" alt="Screenshot (1505)" src="https://github.com/user-attachments/assets/4dcc427d-e034-4cb7-9d63-947059ee210b" />
+
 
 ## Features
 
